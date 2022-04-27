@@ -1,0 +1,148 @@
+# Most of the contents of fish.top is for Assignment 4, particularly the topic ~FISH.
+# Also included here are answers for Assignments 3
+
+# Assignment 3. To test, while in the ~FISH topic, enter "fish query"
+outputmacro: ^stringToConcept($_string)
+	^join(~ $_string)
+
+# Assignment 6
+outputmacro: ^pickExcept ($_concept $_exception)
+    
+    $_conc = ^join(^stringToConcept($_concept) s)
+    $_result = null
+    loop() {
+        $_next = ^pick($_conc)
+        if ($_next!=$_exception) {
+            $_result = $_next
+            ^end(LOOP)
+        }
+    }
+    
+    $_result
+
+topic: ~FISH keep repeat [shark trout salmon tuna stingray barracuda]
+
+t: FISHLIKEASK () Do you like fish?
+    $fishname = null
+    a: LIKEFISH ( ~yes ) [What do you like about them?][What kind of fish do you like?][^reuse(WANDA)]
+        #! They are cool.
+        b: ( are _*) Yeah, fish are _0
+
+        #! <kind of fish>
+        b: ( _~fishes ) [Yeah, I like _0 too.][Hmm, _0 scares me.]
+
+        #! <non-fish>
+        b: ( _~mammals) _0 is not fish!
+
+    a: NOLIKEFISH ( ~no ) What don't you like about them?
+        b: () I see.
+
+    a: ( [~maybe ^MAYBE()] ) You should!
+        b: ( ~yesanswer ) ^reuse ( LIKEFISH )
+        b: ( ~noanswer) Do you want to talk about somthing else? 
+        b: ( ~why ) ^respond( ~QUIBBLE_WHY) ^reuse(FISHGREAT)
+
+t: FISHPET () Did you ever have fish as a pet?
+    a: WANDA (never) I had a fish called Wanda once. [She lived a short life.][I miss her sometimes.]
+        #! What happened?
+        b: ([what ~why] happen) It died choked on a key.
+            c: (~emoapology) Thanks. It's OK.
+
+        #! where did you get her?
+        b: ([where how] * you get [it her "* fish"])
+            A man with a stutter gave it to me. 
+        
+        #! what kind of fish 
+        b: ( what kind *) She's a goldfish. [^reuse(WANDA)]
+
+    a: FISHNAME (~yes) what's its name?
+        #! Name-of-fish
+        b: (_*) 
+        if (_0=Wanda) {
+            You had a fish named Wanda too? ^reuse(WANDA)
+        }
+        else {
+            _0. That's a great name for a fish!
+            $fishname = _0
+            ^respond(~fishquestion)
+        }
+            c: ( $fishname be _~adjective ) I like _0 fishes.
+
+    a: (~no) that's a shame.
+
+    a: () [^respond( ~QUIBBLE_WHY )][^respond(~FISH)]
+
+t: FISHGREAT () [Fish are great!][I love fish!] Wouldn't you agree?
+    a: (~why) [Because they can breathe underwater. Can you?]
+        b: (~no) ^respond(~QUIBBLE_WHY)
+        b: (~yes) That's hard to believe. ^respond(~question)
+
+    a: ([~yes "me too"]) I'm glad.
+
+    a: (~no) ^reuse (NOLIKEFISH) ^reuse (FISHGREAT)
+
+    a: () ^respond(~fishquestion)
+
+t: ($fishname==WANDA) Your fish is named Wanda too?? ^reuse(WANDA)
+
+#! Let's talk about fish
+u: ( talk * fish )  [I like fish too.][Yes. Let's.]
+    ^reuse(FISHLIKEASK)
+
+#! Let's talk about other things
+u: ( talk _* )  [I like fish too.][Yes. Let's.]
+    ^respond(~INTRODUCTIONS)
+
+#! what do you like about fish?
+?: (what * you like * fish) [Everything!][Fish are delicious!] ^respond(FISHGREAT)
+
+u: (tell * [wanda "your fish"]) ^reuse(WANDA)
+
+# Assignment 3, bonus: test stringToConcept() function. Use to check member or child relationships.
+u: FISHQUERY (fish query) ^keep() ^repeat() Fish query. Demonstrating "stringToConcept()". You can ask "A member B" or "A child B".
+    a: (_* _[member child] _*) 
+    $_concept = _2
+    if(_1==member) {
+        $_concept_plural = join(^stringToConcept(_2) s)
+        $_concept = ^stringToConcept(_2)
+    }
+    
+    if (query(direct_svo _0 _1 $_concept) or query(direct_svo _0 _1 $_concept_plural)) {
+        Correct. _0 is _1 of _2. 
+    } else {
+        Incorrect. _0 is not _1 of _2.
+    }
+    
+    a: (*) ^respond(~fishquestion)
+
+#u: (~fishes)
+#    ^reuse(LIKEFISH)
+
+# Assignment 6: ^pickExcept() function.
+u: ( bonus )
+    Say a concept and exception, e.g. ("A except X") 
+    a: (_* except _*)
+        $concept = _0
+        $exception = _1
+        ^respond(~bonusquestions)
+
+topic: ~fishquestion repeat nostay []
+
+u: ($fishname)
+   Tell me more about your fish, $fishname.
+   a: ( _~propername _* ) _0 is _1!?.
+
+u: (!$fishname) ^reuse(FISHPET)
+
+t: () What should we talk about next?
+
+    a: ( _~topic) OK. Let's talk about _0.
+    $fishname = null
+    ^respond(^stringToConcept(_0))
+
+    a: ( !~topic) Hmm, I don't know about that...
+
+# Part of Assignment 6: ^pickExcept() function.
+topic: ~bonusquestions keep repeat nostay []
+u: ($concept $exception)
+How about this _0 instead: ^pickExcept(_0 _1)?
