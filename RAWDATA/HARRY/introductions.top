@@ -17,6 +17,13 @@ t: Have you been here before?
 	a: ([~yes yes]) Welcome back!
 	#! no
 	a: ([~no no]) Then welcome to your first time.
+	#! maybe
+	a: ( [~maybe ^MAYBE()] ) [Did you forget?] [Are you sure?]
+		b: (~yes) That's ok.
+		b: (~no) Alright then.
 
 #! what is your name 
-u: ( what is your name ) My name is Harry Potter.
+u: ( what is your name ) My name is Harry Pottery.
+
+u: ( get facts ) ^keep() ^repeat() OK. What concept would you like to know?
+	a: (_*) So you want to know about the (^stringToConcept(_0)).

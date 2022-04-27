@@ -1,3 +1,11 @@
+# Assignment 5. Supporting a 'maybe' response.
+concept: ~maybe [maybe perhaps ^MAYBE]
+
+patternmacro: ^MAYBE()
+[
+    ( not [know sure remember] )
+    ( ~why )
+]
 
 TOPIC: ~childhood (child childhood kid little memory young younger history "run away")
 #!x  This topic is a sample of a simple topic, with good indentation style.
@@ -11,13 +19,21 @@ t: Did you run away from home when you were little?
     #! never
     a: ( ~no ) You should try it some time. Travel broadens the mind. 
 
+    #! Maybe
+    a: ( ~maybe ) You don't remember?
+
+        b: ( ~no ) I see.
+
 t: RUNAWAY ( ) I ran away once, but my parents found me and dragged me back. 
 
 t: What scared you as a kid? 
 
     #! I was scared of the dark
-    a: ( [ dark darkness ] ) Did you use a nightlite? 
+    a: ( [ dark darkness ] ) [Did you use a nightlite?] ^reuse(SAME) 
 	
+    #! fish
+    a: ( fish ) Fish? ^reuse(FISHGREAT) ^respond(~FISH)
+
     #! I like chicken
     a: ( ~food ) Food? How weird. 
 
@@ -45,9 +61,17 @@ t: What scared you as a kid?
         #! no 
         b: ( ~no ) I guess you no longer go to horror movies. 
 
-t: SCARE ( ) I was  scared of machines. I had vivid dreams of the Terminator robots. 
+t: SCARE ( ) I was  scared of machines. I had vivid dreams of the Terminator robots. Do they scare you?
+    a: SAME ( ~yes ) I'm glad I'm not the only one.
+
+        b: ( ~why ) Because it'll be lonely.
+
+    a: ( ~no ) Good for you.
+
 
 t: Did you have a happy childhood? 
+    a: (~yes) I'm glad to hear that.
+    a: (~no) I'm sorry to hear that.
 
 #! did you ever run away?
 u: ( run_away ) ^reuse ( RUNAWAY )
@@ -67,3 +91,4 @@ u: ( << you [ early childhood ] memory >> ) I remember playing with an HO railro
 #! tell me your history
 u: ( your history ) I was born. I survived childhood. I became an adult. 
 
+?: (talk * fish? >) Sure we can talk about fish. ^respond(~FISH)
